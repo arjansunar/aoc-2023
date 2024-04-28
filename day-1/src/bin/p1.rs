@@ -5,9 +5,31 @@ fn main() {
 }
 
 fn part1(input: &str) -> String {
-    let lines: Vec<&str> = input.lines().map(|line| line).collect();
-    dbg!("{:?}", lines);
-    "142".to_string()
+    let ascii_digits: Vec<String> = input
+        .lines()
+        .map(|s| {
+            let mut nums = "".to_string();
+            for c in s.chars() {
+                if c.is_ascii_digit() {
+                    nums.push(c)
+                }
+            }
+            nums
+        })
+        .collect();
+
+    let sum = ascii_digits
+        .iter()
+        .map(|s| {
+            let mut two_digit = String::new();
+
+            two_digit.push(s.chars().next().expect("Unable to find first digit"));
+            two_digit.push(s.chars().last().expect("Unable to find last digit"));
+
+            two_digit.parse::<u32>().expect("Unable to parse number")
+        })
+        .sum::<u32>();
+    sum.to_string()
 }
 
 #[cfg(test)]
