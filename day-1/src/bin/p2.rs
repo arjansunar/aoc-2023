@@ -4,6 +4,7 @@ fn main() {
 }
 
 fn part2(input: &str) -> String {
+    dbg!("{}", input);
     todo!()
 }
 
@@ -13,7 +14,15 @@ mod tests {
 
     #[test]
     fn it_works() {
-        let result = part2("test");
+        let result = part2(
+            "two1nine
+eightwothree
+abcone2threexyz
+xtwone3four
+4nineeightseven2
+zoneight234
+7pqrstsixteen",
+        );
         assert_eq!(result, "4");
     }
 }
