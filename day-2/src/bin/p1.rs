@@ -36,8 +36,38 @@ impl FromStr for GameSet {
     }
 }
 
+#[derive(Debug, PartialEq, Eq)]
+struct Game {
+    id: u16,
+    sets: Vec<GameSet>
+}
+
+
+#[derive(Debug, PartialEq, Eq)]
+struct ParseGameError;
 fn part1(input: &str) -> String {
     todo!()
+}
+
+
+impl FromStr for Game {
+    type Err = ParseGameError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let parts = s.split(' ').collect::<Vec<_>>();
+        let n = parts.first().and_then(|x| x.parse::<u16>().ok());
+        let ball_type = parts.get(1).map(|x| *x);
+
+        if n.is_none() || ball_type.is_none() {
+            return Err(ParseGameSetError);
+        }
+        match ball_type {
+            Some("red") => Ok(GameSet::Red(n.unwrap())),
+            Some("blue") => Ok(GameSet::Blue(n.unwrap())),
+            Some("green") => Ok(GameSet::Green(n.unwrap())),
+            _ => Err(ParseGameSetError),
+        }
+    }
 }
 
 #[cfg(test)]
