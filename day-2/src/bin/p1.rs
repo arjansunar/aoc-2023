@@ -7,7 +7,7 @@ fn main() {
 }
 
 #[derive(Debug, PartialEq, Eq)]
-enum GameSet {
+enum GameOption {
     Red(u16),
     Blue(u16),
     Green(u16),
@@ -16,7 +16,7 @@ enum GameSet {
 #[derive(Debug, PartialEq, Eq)]
 struct ParseGameSetError;
 
-impl FromStr for GameSet {
+impl FromStr for GameOption {
     type Err = ParseGameSetError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
@@ -28,9 +28,9 @@ impl FromStr for GameSet {
             return Err(ParseGameSetError);
         }
         match ball_type {
-            Some("red") => Ok(GameSet::Red(n.unwrap())),
-            Some("blue") => Ok(GameSet::Blue(n.unwrap())),
-            Some("green") => Ok(GameSet::Green(n.unwrap())),
+            Some("red") => Ok(GameOption::Red(n.unwrap())),
+            Some("blue") => Ok(GameOption::Blue(n.unwrap())),
+            Some("green") => Ok(GameOption::Green(n.unwrap())),
             _ => Err(ParseGameSetError),
         }
     }
@@ -39,16 +39,14 @@ impl FromStr for GameSet {
 #[derive(Debug, PartialEq, Eq)]
 struct Game {
     id: u16,
-    sets: Vec<GameSet>
+    sets: Vec<GameOption>,
 }
-
 
 #[derive(Debug, PartialEq, Eq)]
 struct ParseGameError;
 fn part1(input: &str) -> String {
     todo!()
 }
-
 
 impl FromStr for Game {
     type Err = ParseGameError;
@@ -59,15 +57,20 @@ impl FromStr for Game {
         let ball_type = parts.get(1).map(|x| *x);
 
         if n.is_none() || ball_type.is_none() {
-            return Err(ParseGameSetError);
+            return Err(ParseGameError);
         }
-        match ball_type {
-            Some("red") => Ok(GameSet::Red(n.unwrap())),
-            Some("blue") => Ok(GameSet::Blue(n.unwrap())),
-            Some("green") => Ok(GameSet::Green(n.unwrap())),
-            _ => Err(ParseGameSetError),
-        }
+        Ok(Game {
+            id: n.unwrap(),
+            sets: parse_multi_parts(ball_type.unwrap()),
+        })
     }
+}
+
+fn parse_multi_parts(s: &str) -> Vec<GameOption> {
+    s.split(',')
+        .map(|x| x.trim())
+        .flat_map(GameOption::from_str)
+        .collect::<Vec<_>>()
 }
 
 #[cfg(test)]
@@ -88,8 +91,27 @@ Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green"#,
 
     #[test]
     fn parse_game_test() {
-        assert_eq!(GameSet::from_str("3 blue").unwrap(), GameSet::Blue(3));
-        assert_eq!(GameSet::from_str("5 red").unwrap(), GameSet::Red(5));
-        assert_eq!(GameSet::from_str("3 green").unwrap(), GameSet::Green(3));
+        assert_eq!(GameOption::from_str("3 blue").unwrap(), GameOption::Blue(3));
+        assert_eq!(GameOption::from_str("5 red").unwrap(), GameOption::Red(5));
+        assert_eq!(
+            GameOption::from_str("3 green").unwrap(),
+            GameOption::Green(3)
+        );
+    }
+
+    #[test]
+    fn parse_multi_parts_test() {
+        assert_eq!(
+            parse_multi_parts("3 blue, 4 red"),
+            vec![GameOption::Blue(3), GameOption::Red(4)]
+        );
+        assert_eq!(
+            parse_multi_parts("1 red, 2 green, 6 blue"),
+            vec![
+                GameOption::Red(1),
+                GameOption::Green(2),
+                GameOption::Blue(6)
+            ]
+        );
     }
 }
