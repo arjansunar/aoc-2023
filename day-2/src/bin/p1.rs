@@ -46,10 +46,39 @@ struct Game {
 struct ParseGameError;
 fn part1(input: &str) -> String {
     let parsed = input.lines().map(Game::from_str).collect::<Vec<_>>();
+    let valid_games = parsed
+        .into_iter()
+        .filter(|x| x.as_ref().map(is_valid_game).unwrap_or(false))
+        .collect::<Vec<_>>();
 
-    dbg!(parsed);
+    let total = valid_games
+        .iter()
+        .map(|x| x.as_ref().unwrap().id)
+        .sum::<u16>();
 
-    "8".to_string()
+    total.to_string()
+}
+
+fn is_valid_game(game: &Game) -> bool {
+    game.sets.iter().all(is_valid_set)
+}
+
+const RED_LIMIT: u16 = 12;
+const GREEN_LIMIT: u16 = 13;
+const BLUE_LIMIT: u16 = 14;
+
+fn is_valid_set(set: &Vec<GameOption>) -> bool {
+    for x in set {
+        let is_within_limit: bool = match *x {
+            GameOption::Red(r) => r <= RED_LIMIT,
+            GameOption::Blue(b) => b <= BLUE_LIMIT,
+            GameOption::Green(g) => g <= GREEN_LIMIT,
+        };
+        if !is_within_limit {
+            return false;
+        }
+    }
+    true
 }
 
 impl FromStr for Game {
@@ -98,7 +127,6 @@ Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green"#,
     }
 
     #[test]
-    #[ignore]
     fn parse_game_test() {
         assert_eq!(GameOption::from_str("3 blue").unwrap(), GameOption::Blue(3));
         assert_eq!(GameOption::from_str("5 red").unwrap(), GameOption::Red(5));
@@ -109,7 +137,6 @@ Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green"#,
     }
 
     #[test]
-    #[ignore]
     fn parse_multi_parts_test() {
         assert_eq!(
             parse_multi_parts("3 blue, 4 red"),
@@ -126,7 +153,6 @@ Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green"#,
     }
 
     #[test]
-    #[ignore]
     fn parse_single_game() {
         assert_eq!(
             Game::from_str("Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green"),
@@ -143,5 +169,22 @@ Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green"#,
                 ]
             })
         );
+    }
+    #[test]
+    fn is_valid_set_test() {
+        assert!(is_valid_set(&vec![
+            GameOption::Red(1),
+            GameOption::Green(2),
+            GameOption::Blue(6)
+        ]))
+    }
+
+    #[test]
+    fn is_invalid_set_test() {
+        assert!(!is_valid_set(&vec![
+            GameOption::Red(100),
+            GameOption::Green(2),
+            GameOption::Blue(6)
+        ]))
     }
 }
