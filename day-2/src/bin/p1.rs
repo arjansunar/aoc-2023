@@ -22,7 +22,7 @@ impl FromStr for GameOption {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let parts = s.split(' ').collect::<Vec<_>>();
         let n = parts.first().and_then(|x| x.parse::<u16>().ok());
-        let ball_type = parts.get(1).map(|x| *x);
+        let ball_type = parts.get(1).copied();
 
         if n.is_none() || ball_type.is_none() {
             return Err(ParseGameSetError);
